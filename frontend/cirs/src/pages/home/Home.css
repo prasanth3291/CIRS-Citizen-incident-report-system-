@@ -1,0 +1,11 @@
+.bg-image-textbox{
+    position:absolute;
+    top: 160px;
+    left: 50px;
+    color: white;
+    background-color: rgb(170, 170, 170);
+    padding: 20px;
+    text-align: center;
+    z-index: 0 ;
+
+}
