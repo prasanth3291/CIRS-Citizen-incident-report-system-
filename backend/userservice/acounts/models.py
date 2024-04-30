@@ -72,3 +72,11 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, add_label):
         return True
+    
+class Otp(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)    
+    otp=models.CharField( max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.otp
