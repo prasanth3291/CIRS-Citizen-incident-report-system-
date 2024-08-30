@@ -1,0 +1,8 @@
+ad_nav.active{
+    background-color: #007bff; /* Background color for the active item */
+    color: #fff; /* Text color for the active item */
+    font-weight: bold; /* Make the active item stand out */
+    border-radius: 5px;
+    
+
+}

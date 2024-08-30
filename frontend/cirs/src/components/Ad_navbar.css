@@ -1,0 +1,15 @@
+.Admin_Navbar{
+    border-radius: 4px;
+    background-color: hsl(0, 2%, 25%);
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: center; /* Center the text */
+    text-decoration: none; /* Remove underline */
+}
+.Ad_navlink{
+    text-decoration: none; /* Removes the underline */
+    color: rgb(14, 2, 2); /* Resets the color */
+    background-color: inherit; /* Resets the background color */
+    padding: 0; /* Optional: Adjust padding if needed */
+  }

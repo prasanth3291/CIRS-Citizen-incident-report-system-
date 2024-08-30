@@ -1,0 +1,46 @@
+
+.header{
+margin-left: 0;
+background-color: black;
+background-size: 100%;
+width: 100%;
+height: 60px;
+display: flex;
+
+}
+.Row{
+    margin-left: 0;
+    padding-left: 0;
+}
+img{
+height: 50px;
+margin: 5px;
+padding: 0;
+}
+.title{
+    margin-top: 4px;
+    padding: 5px;
+}
+.title h1{
+    font-size: 35px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 800;
+    color: rgb(248, 248, 248);
+}
+.name{
+    margin-top: 8px;
+    padding: 2px;
+}
+
+.name h6{
+    font-weight: 500;
+    padding: 2px;
+    margin-left: 3px;
+    font-family:Arial, Helvetica, sans-serif;
+    color: white;
+}
+@media(max-width:480px){
+    .name{
+        display: none;
+    }
+}

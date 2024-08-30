@@ -1,0 +1,96 @@
+/* General container styling */
+.CPP {
+  padding: 20px;
+  background-color: #ffffff; /* White background for the main container */
+  width: 80%;
+  height: 100%;
+  display: flex; /* Use flexbox to align columns */
+  gap: 10px; /* Add gap between the navbar and the container */
+  margin-top: 20px; /* Add 20px margin on top */
+  position: relative; /* Set position relative to allow absolute positioning of the edit button */
+}
+
+/* Adjust spacing between Navbar and container */
+.CPP-ROW {
+  margin-left: 10px; /* Add a 10px margin to separate the navbar from the container */
+  width: calc(100% - 10px); /* Adjust width to account for the margin */
+}
+
+/* Left and Right Columns */
+.CPP-LEFT,
+.CPP-RIGHT {
+  flex: 1; /* Ensure both left and right columns are equal in width */
+  padding: 10px; /* Add padding to ensure spacing */
+}
+
+/* Left Column Specific Styling */
+.CPP-LEFT {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content vertically */
+  justify-content: center; /* Center content horizontally */
+  position: relative; /* Keep relative for edit button positioning */
+}
+
+/* Profile Container */
+.CPR-profile {
+  width: 100%; /* Ensure profile container takes up full width */
+  display: flex;
+  align-items: center; /* Center image vertically */
+  justify-content: center; /* Center image horizontally */
+  position: relative;
+}
+
+.CPR-profile img {
+  width: 80%; /* Make sure the image takes up 80% of the profile container width */
+  max-width: 400px; /* Limit the maximum width */
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 50%; /* Make the image circular */
+  object-fit: cover; /* Cover the container while maintaining aspect ratio */
+}
+
+/* Handle file input preview consistency */
+.CPP-L-2 img {
+  width: 80%;
+  max-width: 400px;
+  height: auto;
+  border-radius: 50%; /* Maintain circular shape */
+  object-fit: cover;
+}
+
+/* Right Column Specific Styling */
+.CPP-RIGHT {
+  background-color: transparent; /* Remove background color */
+}
+
+/* Column Rows */
+.CPP-L-1,
+.CPP-L-2,
+.CPP-R-1,
+.CPP-R-2,
+.CPP-R-3,
+.CPP-R-4,
+.CPP-R-5,
+.CPP-R-6 {
+  background-color: transparent; /* Remove background color */
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+/* Edit Button */
+.btn-edit {
+  position: absolute;
+  top: 10px; /* Position at the top */
+  right: 10px; /* Position at the right */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px; /* Add border radius for a rounded button */
+  z-index: 1000; /* Ensure the button stays on top */
+}
+
+.btn-edit:hover {
+  background-color: #0056b3;
+}

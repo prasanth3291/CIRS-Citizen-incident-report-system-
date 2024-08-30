@@ -1,0 +1,116 @@
+
+.active{
+    background-color: #007bff; /* Background color for the active item */
+    color: #fff; /* Text color for the active item */
+    font-weight: bold; /* Make the active item stand out */
+    border-radius: 5px;
+    
+    
+}
+@media(max-width:480px){
+    nav.menu {
+        display: flex;
+    }
+    
+    nav .menu{
+        position: absolute;
+        top: 18px;
+        right: 8px;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 25px;
+        height: 15px;
+        display: flex;
+    }
+    nav .menu span{
+        height: 2px;
+        width: 1005;
+        background-color: rgb(239, 232, 232);
+    
+    }
+    nav{
+        flex-direction: column;
+        align-items: start;   
+        background-color: black;    
+        
+
+    }
+    nav ul{
+        display: none;
+        flex-direction: column;
+        width:100%;
+        margin: 0px;  
+        margin-top: 0px;
+        background-color: black;
+            
+    }
+    nav ul li{
+       width: 100%;
+       text-align: center;      
+    
+    }
+    .display {
+        display: none;
+
+    }
+    nav ul li a{
+        margin: 10px;
+    }
+    
+}
+nav{
+    display: flex;
+    justify-content: space-between;
+    background-color: black;
+    align-items: center;  
+    position: sticky;
+    top:0;  
+    height: 45px;
+    border-bottom: 1px solid white;
+    
+    
+
+}
+
+@media (min-width: 481px) {
+    nav ul {
+        display: flex;
+        padding-left: 0;
+    }
+    nav ul{
+        margin-top: 7px;
+    }
+  
+}
+nav ul{
+    display: flex;
+    padding-left: 0;
+
+}
+
+nav ul li{
+    list-style: none;
+}
+nav ul li a{
+    display: block;
+    text-decoration: none;
+    color: white;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+}
+nav ul li h6{
+font-size: 1rem;
+color: white;
+margin-top: 13px;
+margin-right: 5px;
+}
+
+ul li input{
+    margin-top: 12px;
+    height: 22px;
+    
+}
+nav ul li a:not(.active):hover{
+    background-color: rgb(43, 40, 40);
+}

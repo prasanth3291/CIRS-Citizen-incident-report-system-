@@ -1,0 +1,92 @@
+
+.underline {
+    width: 61px;
+    height: 6px;
+    background: #fff; /* Changed to white for better visibility */
+    border-radius: 9px;
+}
+
+
+
+/* Error Styling */
+.error {
+    color: red;
+    font-weight: 900;
+    margin-top: -15px;
+    position: relative;
+    left: 0; /* Aligns error text to the left of the input */
+    text-align: center;
+    width: 100%;
+}
+
+
+
+/* Alternate Login Styling */
+.or {
+    color: #fff;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.alt-login {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.alt-login div {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #e6e2e1;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+/* Google Icon Styling */
+.google {
+    background-image: url('../../assets/google.png');
+}
+
+/* Member Login Button */
+.member-login-button {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.member-login-button a {
+    color: #fff;
+    font-size: 14px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 480px) {
+  .reg-container {
+    width: 90%; /* Adjust width for smaller screens */
+    padding: 20px;
+  }
+
+  .reg-input {
+    width: 100%; /* Make the input container full-width */
+  }
+
+  .reg-input input {
+    width: 100%; /* Make the input width 100% for smaller screens */
+  }
+
+  .reg-submit-container {
+    flex-direction: column; /* Stack submit buttons vertically on smaller screens */
+    align-items: center;
+  }
+
+  .alt-login div {
+    width: 40px; /* Adjust width for smaller screens */
+    height: 40px;
+  }
+}
