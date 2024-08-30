@@ -1,4 +1,3 @@
-# adapters.py
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter

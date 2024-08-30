@@ -12,6 +12,7 @@ from allauth.account.views import LoginView
 @method_decorator(login_required, name='dispatch')
 class GoogleLoginView(LoginView):
     def get(self, request, *args, **kwargs):
+        ('login google')
         # Check if the user is already associated with a Google account
         google_account = SocialAccount.objects.filter(user=request.user, provider='google').first()
         if google_account:

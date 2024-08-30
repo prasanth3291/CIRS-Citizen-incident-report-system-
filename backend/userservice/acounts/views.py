@@ -1,62 +1,64 @@
-from django.shortcuts import render,HttpResponse,redirect
-from rest_framework.views import APIView,Response,status
-from .serializers import UserSerializer
-from .models import User,Otp
+from django.shortcuts import redirect, get_object_or_404, render
+from rest_framework.views import APIView, Response, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-# from rest_framework_simplejwt.tokens import RefreshToken
-# from rest_framework.permissions import IsAuthenticated
-# from allauth.account.views import LogoutView as AllauthLogoutView
-
+from django.contrib.auth.decorators import login_required
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
-from socialauth.adpaters import CustomGoogleOAuth2Adapter,CustomOAuth2Client
+from socialauth.adpaters import CustomGoogleOAuth2Adapter, CustomOAuth2Client
 
-# email verification
+# Email Verification
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
-#activation
-from django.utils.http import urlsafe_base64_decode
-from django.contrib.auth import get_user_model
-from rest_framework.decorators import api_view
-
+# Activation
+from django.contrib.auth import get_user_model,login
 import random
 from django.http import JsonResponse
 
-# for nearest police station
+# For Nearest Police Station
 import requests
 
+# Profile
+from .models import User, Otp, Profile
+from .serializers import UserSerializer, ProfileSerializer
+from .forms import ProfileForm
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+import os
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.permissions import AllowAny
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
+from django.contrib.auth import load_backend
+import time
 
 
 class GoogleLogin(SocialLoginView): # if you want to use Authorization Code Grant, use this
-
     adapter_class = GoogleOAuth2Adapter
-    callback_url = 'http://localhost:3000'
-    # client_class = OAuth2Client
-    # def post(self,request,*args, **kwargs):
-        
-    #     print('its called dude')
-    #     return Response(status=status.HTTP_201_CREATED)  
+    callback_url = 'http://localhost:3000'   
+
+
 class customeGoogleLogin(GoogleLogin):
     adapter_class =CustomGoogleOAuth2Adapter  
-    client_class=CustomOAuth2Client
+    client_class=CustomOAuth2Client    
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         # Add custom claims
-        token['first name'] = user.first_name
+        token['first_name'] = user.first_name
         token['email']=user.email   
         token['username']=user.username    
         # ...
@@ -66,10 +68,15 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 class loginView(APIView):
     def post(self,request):
+        print('is it ok')
         username = request.data['username']
-        password = request.data['password']          
-        user=User.objects.filter(username=username).first()
-        print(user) 
+        password = request.data['password']      
+        user_type = request.data['user_type']  
+        if user_type=='staff':
+            user_type=['state_admin','station_admin']
+        else:
+            user_type=[user_type]
+        user=User.objects.filter(username=username,user_type__in=user_type).first()
         if user is None:
             raise AuthenticationFailed('user not found')
         #check user is active or not
@@ -83,21 +90,28 @@ class loginView(APIView):
         # return Response('login successfull', status=status.HTTP_201_CREATED)
     
         if user is not None:
+            print('ivide varuu')
             obj=MyTokenObtainPairSerializer()
             token=obj.get_token(user)                   
             access_token = str(token.access_token)
             refresh_token  =str(token)
             return Response({
-                'access_token': access_token,
-                'refresh_token': refresh_token,
+                'access': access_token,
+                'refresh': refresh_token,
+                'user': {
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
             }, status=status.HTTP_200_OK)
         else:
-            raise AuthenticationFailed('Invalid credentials')    
-    
+            raise AuthenticationFailed('Invalid credentials')       
 
 
 class RegisterView(APIView):
     def post(self,request):      
+        print('inside register')
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -105,32 +119,34 @@ class RegisterView(APIView):
             # return Response({'status':200,'message':'an verification email send to your email'})
             return Response(success_message, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)       
 
 
 @receiver(post_save,sender=User)
 def send_email_token(sender,instance,created,**kwargs):
-    print('its ok')
-    if created:
-        print('created')
+    if created:        
         try:
-            print('instance=',instance)
-            subject='Your email is to be verified'
-            token=default_token_generator.make_token(instance)
-            message = render_to_string("acounts/email_verification.html", {
-                'user': instance,
-                'domain': '127.0.0.1:8000',
-                "uid": urlsafe_base64_encode(force_bytes(instance)),  
-                'token':token,
-            })
-            email_from=settings.EMAIL_HOST_USER
-            recipient_list=[instance.email]
-            print('here')
-            send_mail(subject,message,email_from,recipient_list)
+            # Here need to provide two conditions 
+            # 1). If instance is created by Google then No email verification else provide email verification
+            if instance.auth_provider == 'google':
+                instance.is_active = True
+                instance.save()
+            else:
+            # if the instance created manually
+                subject='Your email is to be verified'
+                token=default_token_generator.make_token(instance)
+                message = render_to_string("acounts/email_verification.html", {
+                    'user': instance,
+                    'domain': '127.0.0.1:8000',
+                    "uid": urlsafe_base64_encode(force_bytes(instance)),  
+                    'token':token,
+                })
+                email_from=settings.EMAIL_HOST_USER
+                recipient_list=[instance.email]
+                print('here')
+                send_mail(subject,message,email_from,recipient_list)
         except Exception as e:
             print(e)
-
         
 # activate
 def activate(request, uidb64, token):    
@@ -187,7 +203,6 @@ def forgot_password(request):
 def resest_password(request):
     if request.method=='POST':
         email=request.data.get('verified_email')
-        print('email=',email)
         otp=request.data.get('otp')
         try:
             user=User.objects.get(email=email)
@@ -197,11 +212,8 @@ def resest_password(request):
         #verify otp
         try:          
             user_otp=Otp.objects.get(user=user)
-            print('otp',user_otp)
-            print(otp)
             if str(user_otp)==str(otp):
                 password=request.data.get('password')
-                print('password')
                 user.set_password(password)
                 user.save()
                 return Response({'success': 'Password changed successfully'}, status=200)
@@ -219,15 +231,149 @@ def get_nearby_police_station(request):
 
     response = requests.get(url)
     data = response.json()
-
     return JsonResponse(data)
 
-            
 
-       
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile_detail(request):
+    profile = get_object_or_404(Profile, user=request.user)
+    serializer = ProfileSerializer(profile)
+    return Response(serializer.data)
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def profile_update(request):
+    profile = get_object_or_404(Profile, user=request.user)
+
+    # Extract user-related data
+    user_data = {
+        'first_name': request.data.get('first_name'),
+        'last_name': request.data.get('last_name')
+    }
+
+    profile_data = request.data.copy()
+    profile_data.pop('first_name', None)
+    profile_data.pop('last_name', None)
+
+    # Update Profile serializer
+    serializer = ProfileSerializer(profile, data=profile_data, partial=True)
+    
+    if serializer.is_valid():
+        # Save the profile changes
+        serializer.save()
+
+        # Update the User instance
+        user = profile.user
+        user.first_name = user_data.get('first_name', user.first_name)
+        user.last_name = user_data.get('last_name', user.last_name)
+        user.save()
+
+        return Response(serializer.data)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 
 
 
+def refresh_google_token(request):
+    # Assuming the refresh token is sent in the body of a POST request
+    refresh_token = request.POST.get('refresh_token')
+
+    if not refresh_token:
+        return JsonResponse({'error': 'Refresh token is required'}, status=400)
+
+    try:
+        # Load credentials from the refresh token
+        credentials = Credentials(None, refresh_token=refresh_token, token_uri='https://oauth2.googleapis.com/token',
+                                  client_id=os.environ.get('GOOGLE_CLIENT_ID'),
+                                  client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'))
+
+        # Refresh the access token
+        request = Request()
+        credentials.refresh(request)
+
+        # Return the new access token and refresh token
+        return JsonResponse({
+            'access_token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'expires_in': credentials.expiry
+        }, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def google_login(request):
+    code = request.data.get('code')
+
+    if not code:
+        return JsonResponse({'error': 'No authorization code provided'}, status=400)
+
+    token_url = 'https://oauth2.googleapis.com/token'
+    data = {
+        'code': code,
+        'client_id': settings.GOOGLE_CLIENT_ID,
+        'client_secret': settings.CLIENT_SECRET,
+        'redirect_uri': 'http://localhost:3000',  # Ensure this matches exactly with the frontend
+        'grant_type': 'authorization_code'
+    }
+
+    token_response = requests.post(token_url, data=data)
+    token_data = token_response.json()
+
+    if token_response.status_code != 200:
+        return JsonResponse(token_data, status=token_response.status_code)
+
+    id_token_str = token_data.get('id_token')
+    if not id_token_str:
+        return JsonResponse({'error': 'No ID token in response'}, status=400)
+
+    try:
+        id_info = id_token.verify_oauth2_token(id_token_str, google_requests.Request(),
+                                               settings.GOOGLE_CLIENT_ID)
+        if id_info['aud'] != settings.GOOGLE_CLIENT_ID:
+            return JsonResponse({'error': 'Invalid audience'}, status=400)
+
+        if id_info.get('exp') < time.time():
+            return JsonResponse({'error': 'Token has expired'}, status=400)
+
+        email = id_info['email']
+        first_name = id_info.get('given_name', '')  # Get the user's first name from Google info
+        last_name = id_info.get('family_name', '')  # Get the user's last name from Google info
+
+        User = get_user_model()
+        user, created = User.objects.get_or_create(email=email, defaults={'username': email, 'first_name': first_name, 'last_name': last_name, 'auth_provider': 'google'})
+        
+        # Update the user's first and last name if the user already exists
+        if not created:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.auth_provider = 'google'
+            user.save()
+      
+        # Specify the backend explicitly
+        backend = settings.AUTHENTICATION_BACKENDS[0]  # Use the first backend or specify the one you need
+        backend_instance = load_backend(backend)
+        user.backend = f'{backend_instance.__module__}.{backend_instance.__class__.__name__}'
+        
+        # Issue Django JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        login(request, user, backend=user.backend)
+
+        return Response({
+            'access': str(access),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+        })
+    except ValueError as e:
+        print("Invalid token:", e)
+        return JsonResponse({'error': 'Invalid token'}, status=400)
 
 
 

@@ -49,25 +49,47 @@ SITE_ID = 1  # Replace with the actual primary key of your site
 
 SOCIALACCOUNT_LOGIN_ON_GET=True
 
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         'SCOPE': [
+#             'https://www.googleapis.com/auth/userinfo.profile',
+#             'https://www.googleapis.com/auth/userinfo.email',
+             
+#         ],
+#           'AUTH_PARAMS': {
+#             'access_type': 'offline',  # Important for getting a refresh token
+#             'prompt': 'consent',
+#         },
+        
+#         'CLIENT_ID':"1013654891852-1nbqppqitq2d6r1bft65grcur39lg1na.apps.googleusercontent.com",
+#         'CLIENT_SECRET':"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"
+#     }
+# }
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'SCOPE': [
-            'https://www.googleapis.com/auth/userinfo.profile',
+        'SCOPE':  [
             'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/userinfo.profile',
         ],
-        'CLIENT_ID':"1013654891852-1nbqppqitq2d6r1bft65grcur39lg1na.apps.googleusercontent.com",
-        'CLIENT_SECRET':"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"
+        'AUTH_PARAMS': {
+            'access_type':'offline',
+            'prompt': 'consent',
+
+        },
+        'KEY': '1013654891852-1nbqppqitq2d6r1bft65grcur39lg1na.apps.googleusercontent.com',
+        'SECRET':'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'
     }
 }
 
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.security.SecurityMiddleware',    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',    
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',    
     'allauth.account.middleware.AccountMiddleware',
@@ -121,17 +143,16 @@ SIMPLE_JWT = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
     
-        #'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
-    )
+    ),
+        'DEFAULT_PERMISSION_CLASSES': (
+        # 'rest_framework.permissions.IsAuthenticated',  # Ensure users must be authenticated by default
+    ),
 
 }
 
-SIMPLE_JWT = {
-  # It will work instead of the default serializer(TokenObtainPairSerializer).
-  "TOKEN_OBTAIN_SERIALIZER": "my_app.serializers.MyTokenObtainPairSerializer",
-  # ...
-}
+
 
 #new
 CORS_ALLOW_CREDENTIALS = True
@@ -239,7 +260,7 @@ LOGOUT_REDIRECT_URL='http://localhost:3000'
 GOOGLE_CLIENT_ID="1013654891852-1nbqppqitq2d6r1bft65grcur39lg1na.apps.googleusercontent.com"
 CLIENT_SECRET="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"
 SOCIAL_AUTH_PASSWORD='ABCDEFGH12345'
-# ACCOUNT_ADAPTER = 'acounts.adapters.CustomSocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'acounts.adapters.CustomSocialAccountAdapter'
 
 # smtp configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
