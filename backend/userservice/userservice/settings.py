@@ -49,23 +49,6 @@ SITE_ID = 1  # Replace with the actual primary key of your site
 
 SOCIALACCOUNT_LOGIN_ON_GET=True
 
-# SOCIALACCOUNT_PROVIDERS = {
-#     'google': {
-#         'SCOPE': [
-#             'https://www.googleapis.com/auth/userinfo.profile',
-#             'https://www.googleapis.com/auth/userinfo.email',
-             
-#         ],
-#           'AUTH_PARAMS': {
-#             'access_type': 'offline',  # Important for getting a refresh token
-#             'prompt': 'consent',
-#         },
-        
-#         'CLIENT_ID':"1013654891852-1nbqppqitq2d6r1bft65grcur39lg1na.apps.googleusercontent.com",
-#         'CLIENT_SECRET':"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"
-#     }
-# }
-
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE':  [
